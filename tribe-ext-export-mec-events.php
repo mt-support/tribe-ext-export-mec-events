@@ -3,7 +3,7 @@
  * Plugin Name:       The Events Calendar Extension: Export Events from Modern Events Calendar
  * Plugin URI:        https://theeventscalendar.com/extensions/migrating-events-from-modern-events-calendar
  * Description:       Export Events from Modern Events Calendar
- * Version:           1.0.0
+ * Version:           1.0.1
  * Extension Class:   Tribe__Extension__Export_Events_Modern_Events_Calendar
  * GitHub Plugin URI: https://github.com/mt-support/tribe-ext-export-mec-events
  * Author:            Modern Tribe, Inc.
@@ -24,6 +24,8 @@
  */
 
 // Do not load unless Tribe Common is fully loaded and our class does not yet exist.
+use Tribe\Events\Admin\Settings;
+
 if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Export_Events_Modern_Events_Calendar' ) ) {
 	/**
 	 * Extension main class, class begins loading on init() function.
@@ -49,7 +51,7 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 			load_plugin_textdomain( 'tribe-ext-export-mec-events', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 
 			add_action( 'admin_init', array( $this, 'add_admin_settings' ) );
-			add_action( 'load-tribe_events_page_' . Tribe__Settings::$parent_slug, array(
+			add_action( 'load-tribe_events_page_' . Settings::$settings_page_id, array(
 				$this,
 				'listen_for_export_button',
 			), 10, 0 );
@@ -96,12 +98,11 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 		 */
 		public function export_button( $type, $text = '' ) {
 			$text     = $text ? $text : __( 'Export Events', 'tribe-ext-export-mec-events' );
-			$settings = Tribe__Settings::instance();
 
 			// get the base settings page url
 			$url = apply_filters( 'tribe_settings_url', add_query_arg( array(
 				'post_type' => Tribe__Events__Main::POSTTYPE,
-				'page'      => $settings->adminSlug,
+				'page'      => Settings::$settings_page_id,
 				'tab'       => 'imports',
 			), admin_url( 'edit.php' ) ) );
 
@@ -125,7 +126,9 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 
 			if ( empty( $_REQUEST['export_events'] ) && empty( $_REQUEST['export_organizers'] ) && empty( $_REQUEST['export_venues'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_events' ) && ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_organizers' ) && ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_venues' ) ) {
 				return;
-			} elseif ( ! empty( $_REQUEST['export_events'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_events' ) ) {
+			}
+
+			if ( ! empty( $_REQUEST['export_events'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_events' ) ) {
 				$this->events_csv_setup();
 			} elseif ( ! empty( $_REQUEST['export_organizers'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_organizers' ) ) {
 				$this->organizers_csv_setup();
@@ -381,18 +384,14 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 		/**
 		 * Generate the CSV files.
 		 *
+		 * @since TBD Fixed warning from order of header output.
+		 *
 		 * @param string $csv_file_name - The name of the CSV file to be created
-		 * @param array  $header        - The name of the columns
-		 * @param array  $data
+		 * @param array  $csv_header    - The name of the columns
+		 * @param array  $data          Event entries.
 		 */
-		public function generate_csv( $csv_file_name, $header, $data ) {
-
+		public function generate_csv( $csv_file_name, $csv_header, $data ) {
 			$fh = fopen( 'php://output', 'w' );
-
-			/**
-			 * Write the file header for correct encoding ( UTF8 )
-			 */
-			fprintf( $fh, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
 			header( 'Cache-Control: must-revalidate, post-check=0, pre-check=0' );
 			header( 'Content-Description: File Transfer' );
@@ -401,13 +400,16 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 			header( 'Expires: 0' );
 			header( 'Pragma: public' );
 
-			fputcsv( $fh, $header );
+			// Write the file header for correct encoding ( UTF8 ).
+			fprintf( $fh, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
+			// Output CSV data.
+			fputcsv( $fh, $csv_header );
 			foreach ( $data as $data_row ) {
 				fputcsv( $fh, $data_row );
 			}
-
 			fclose( $fh );
+
 			die();
 		}
 	}

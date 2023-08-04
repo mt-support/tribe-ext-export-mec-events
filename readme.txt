@@ -35,6 +35,11 @@ We're always interested in your feedback and our [premium forums](https://theeve
 
 == Changelog ==
 
+= [1.0.1] TBD =
+
+* Fix - Updating export URL with the new settings slug. [TEC-4442]
+* Fix - Fixed header output warning happening on CSV export. [TEC-4442]
+
 = 1.0.0 2018-07-04 = Initial Version
 
 * Initial release
