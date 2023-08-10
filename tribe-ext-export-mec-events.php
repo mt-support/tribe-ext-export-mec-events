@@ -414,7 +414,7 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 		 * @since TBD Fixed warning from order of header output.
 		 *
 		 * @param string $csv_file_name - The name of the CSV file to be created
-		 * @param array  $csv_header    - The name of the columns
+		 * @param array  $csv_header    The name of the columns
 		 * @param array  $data          Event entries.
 		 */
 		public function generate_csv( $csv_file_name, $csv_header, $data ) {
