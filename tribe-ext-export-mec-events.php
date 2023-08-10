@@ -38,7 +38,7 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 		 * This always executes even if the required plugins are not present.
 		 */
 		public function construct() {
-			$this->add_required_plugin( 'Tribe__Events__Main' );
+			$this->add_required_plugin( 'Tribe__Events__Main', '5.15.0' );
 			$this->set_url( 'https://theeventscalendar.com/extensions/' );
 		}
 
