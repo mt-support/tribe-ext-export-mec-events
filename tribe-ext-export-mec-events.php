@@ -432,6 +432,7 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 
 			// Output CSV data.
 			fputcsv( $fh, $csv_header );
+			
 			foreach ( $data as $data_row ) {
 				fputcsv( $fh, $data_row );
 			}
