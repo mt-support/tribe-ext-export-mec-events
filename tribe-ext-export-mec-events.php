@@ -3,7 +3,7 @@
  * Plugin Name:       The Events Calendar Extension: Export Events from Modern Events Calendar
  * Plugin URI:        https://theeventscalendar.com/extensions/migrating-events-from-modern-events-calendar
  * Description:       Export Events from Modern Events Calendar
- * Version:           1.0.0
+ * Version:           1.0.1
  * Extension Class:   Tribe__Extension__Export_Events_Modern_Events_Calendar
  * GitHub Plugin URI: https://github.com/mt-support/tribe-ext-export-mec-events
  * Author:            Modern Tribe, Inc.
@@ -24,6 +24,8 @@
  */
 
 // Do not load unless Tribe Common is fully loaded and our class does not yet exist.
+use Tribe\Events\Admin\Settings;
+
 if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Export_Events_Modern_Events_Calendar' ) ) {
 	/**
 	 * Extension main class, class begins loading on init() function.
@@ -36,7 +38,7 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 		 * This always executes even if the required plugins are not present.
 		 */
 		public function construct() {
-			$this->add_required_plugin( 'Tribe__Events__Main' );
+			$this->add_required_plugin( 'Tribe__Events__Main', '5.15.0' );
 			$this->set_url( 'https://theeventscalendar.com/extensions/' );
 		}
 
@@ -49,7 +51,7 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 			load_plugin_textdomain( 'tribe-ext-export-mec-events', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 
 			add_action( 'admin_init', array( $this, 'add_admin_settings' ) );
-			add_action( 'load-tribe_events_page_' . Tribe__Settings::$parent_slug, array(
+			add_action( 'load-tribe_events_page_' . Settings::$settings_page_id, array(
 				$this,
 				'listen_for_export_button',
 			), 10, 0 );
@@ -67,23 +69,50 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 
 			$setting_helper->add_field( 'export-defaults-mec', array(
 				'type' => 'html',
-				'html' => '<h3 id="tribe-ext-export-mec-events">' . esc_html__( 'Migration Tools - Modern Events Calendar', 'tribe-ext-export-mec-events' ) . '</h3>',
+				'html' => '<h3 id="tribe-ext-export-mec-events">'
+                    . esc_html__( 'Migration Tools - Modern Events Calendar', 'tribe-ext-export-mec-events' )
+                    . '</h3>',
 			), 'imports', 'tribe_aggregator_disable', false );
 
 			$setting_helper->add_field( 'mec_export_events', array(
 				'type' => 'html',
-				'html' => '<fieldset class="tribe-field tribe-field-html"><legend>' . esc_html__( 'Events', 'tribe-ext-export-mec-events' ) . '</legend><div class="tribe-field-wrap">' . $this->export_button( 'export_events', esc_html__( 'Export Events', 'tribe-ext-export-mec-events' ) ) . '<p class="tribe-field-indent description">' . esc_html__( 'Export your events from Modern Event Calendar and use the CSV file to import them to The Event Calendar. Before exporting your data, please make sure that Modern Event Calendar is enabled on your site.
-', 'tribe-ext-export-mec-events' ) . sprintf( '<a href="%1$s" target="_blank">%2$s</a>', esc_attr( 'https://theeventscalendar.com/extensions/migrating-events-from-modern-events-calendar/' ), esc_html( 'Learn more.' ) ) . '</p></div></fieldset><div class="clear"></div>',
+				'html' => '<fieldset class="tribe-field tribe-field-html"><legend>'
+                    . esc_html__( 'Events', 'tribe-ext-export-mec-events' )
+                    . '</legend><div class="tribe-field-wrap">'
+                    . $this->export_button( 'export_events', esc_html__( 'Export Events', 'tribe-ext-export-mec-events' ) )
+                    . '<p class="tribe-field-indent description">'
+                    . esc_html__(
+                        'Export your events from Modern Event Calendar and use the CSV file to import them to The Event Calendar. Before exporting your data, please make sure that Modern Event Calendar is enabled on your site.',
+                        'tribe-ext-export-mec-events'
+                    )
+                    . sprintf(
+                        '<a href="%1$s" target="_blank">%2$s</a>',
+                        esc_attr( 'https://theeventscalendar.com/extensions/migrating-events-from-modern-events-calendar/' ),
+                        esc_html__( 'Learn more.', 'tribe-ext-export-mec-events' )
+                    )
+                    . '</p></div></fieldset><div class="clear"></div>',
 			), 'imports', 'tribe_aggregator_disable', false );
 
 			$setting_helper->add_field( 'mec_export_organizers', array(
 				'type' => 'html',
-				'html' => '<fieldset class="tribe-field tribe-field-html"><legend>' . esc_html__( 'Organizers', 'tribe-ext-export-mec-events' ) . '</legend><div class="tribe-field-wrap">' . $this->export_button( 'export_organizers', esc_html__( 'Export Organizers', 'tribe-ext-export-mec-events' ) ) . '<p class="tribe-field-indent description">' . esc_html__( 'Export your organizers from Modern Events Calendar.', 'tribe-ext-export-mec-events' ) . '</p></div></fieldset><div class="clear"></div>',
+				'html' => '<fieldset class="tribe-field tribe-field-html"><legend>'
+                    . esc_html__( 'Organizers', 'tribe-ext-export-mec-events' )
+                    . '</legend><div class="tribe-field-wrap">'
+                    . $this->export_button( 'export_organizers', esc_html__( 'Export Organizers', 'tribe-ext-export-mec-events' ) )
+                    . '<p class="tribe-field-indent description">'
+                    . esc_html__( 'Export your organizers from Modern Events Calendar.', 'tribe-ext-export-mec-events' )
+                    . '</p></div></fieldset><div class="clear"></div>',
 			), 'imports', 'tribe_aggregator_disable', false );
 
 			$setting_helper->add_field( 'mec_export_venues', array(
 				'type' => 'html',
-				'html' => '<fieldset class="tribe-field tribe-field-html"><legend>' . esc_html__( 'Venues', 'tribe-ext-export-mec-events' ) . '</legend><div class="tribe-field-wrap">' . $this->export_button( 'export_venues', esc_html__( 'Export Venues', 'tribe-ext-export-mec-events' ) ) . '<p class="tribe-field-indent description">' . esc_html__( 'Export your venues from Modern Events Calendar.', 'tribe-ext-export-mec-events' ) . '</p></div></fieldset><div class="clear"></div>',
+				'html' => '<fieldset class="tribe-field tribe-field-html"><legend>'
+                    . esc_html__( 'Venues', 'tribe-ext-export-mec-events' )
+                    . '</legend><div class="tribe-field-wrap">'
+                    . $this->export_button( 'export_venues', esc_html__( 'Export Venues', 'tribe-ext-export-mec-events' ) )
+                    . '<p class="tribe-field-indent description">'
+                    . esc_html__( 'Export your venues from Modern Events Calendar.', 'tribe-ext-export-mec-events' )
+                    . '</p></div></fieldset><div class="clear"></div>',
 			), 'imports', 'tribe_aggregator_disable', false );
 		}
 
@@ -96,12 +125,11 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 		 */
 		public function export_button( $type, $text = '' ) {
 			$text     = $text ? $text : __( 'Export Events', 'tribe-ext-export-mec-events' );
-			$settings = Tribe__Settings::instance();
 
 			// get the base settings page url
 			$url = apply_filters( 'tribe_settings_url', add_query_arg( array(
 				'post_type' => Tribe__Events__Main::POSTTYPE,
-				'page'      => $settings->adminSlug,
+				'page'      => Settings::$settings_page_id,
 				'tab'       => 'imports',
 			), admin_url( 'edit.php' ) ) );
 
@@ -125,7 +153,9 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 
 			if ( empty( $_REQUEST['export_events'] ) && empty( $_REQUEST['export_organizers'] ) && empty( $_REQUEST['export_venues'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_events' ) && ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_organizers' ) && ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_venues' ) ) {
 				return;
-			} elseif ( ! empty( $_REQUEST['export_events'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_events' ) ) {
+			}
+
+			if ( ! empty( $_REQUEST['export_events'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_events' ) ) {
 				$this->events_csv_setup();
 			} elseif ( ! empty( $_REQUEST['export_organizers'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'export_organizers' ) ) {
 				$this->organizers_csv_setup();
@@ -181,7 +211,7 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 				SELECT t1.object_id AS post_id,
 					GROUP_CONCAT(DISTINCT IF(t3.taxonomy = 'post_tag', t2.name, NULL), '') AS post_tag,
 					GROUP_CONCAT(DISTINCT IF(t3.taxonomy = 'mec_category', t2.name, NULL), '') AS post_category
-				FROM {$wpdb->term_relationships} AS t1 
+				FROM {$wpdb->term_relationships} AS t1
 				INNER JOIN {$wpdb->terms} AS t2 ON t1.term_taxonomy_id = t2.term_id
 				INNER JOIN {$wpdb->term_taxonomy} AS t3 ON t2.term_id = t3.term_id
 				WHERE t3.taxonomy IN ('post_tag', 'mec_category')
@@ -381,18 +411,14 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 		/**
 		 * Generate the CSV files.
 		 *
+		 * @since TBD Fixed warning from order of header output.
+		 *
 		 * @param string $csv_file_name - The name of the CSV file to be created
-		 * @param array  $header        - The name of the columns
-		 * @param array  $data
+		 * @param array  $csv_header    The name of the columns
+		 * @param array  $data          Event entries.
 		 */
-		public function generate_csv( $csv_file_name, $header, $data ) {
-
+		public function generate_csv( $csv_file_name, $csv_header, $data ) {
 			$fh = fopen( 'php://output', 'w' );
-
-			/**
-			 * Write the file header for correct encoding ( UTF8 )
-			 */
-			fprintf( $fh, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
 			header( 'Cache-Control: must-revalidate, post-check=0, pre-check=0' );
 			header( 'Content-Description: File Transfer' );
@@ -401,13 +427,17 @@ if ( class_exists( 'Tribe__Extension' ) && ! class_exists( 'Tribe__Extension__Ex
 			header( 'Expires: 0' );
 			header( 'Pragma: public' );
 
-			fputcsv( $fh, $header );
+			// Write the file header for correct encoding ( UTF8 ).
+			fprintf( $fh, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
+			// Output CSV data.
+			fputcsv( $fh, $csv_header );
+			
 			foreach ( $data as $data_row ) {
 				fputcsv( $fh, $data_row );
 			}
-
 			fclose( $fh );
+
 			die();
 		}
 	}
