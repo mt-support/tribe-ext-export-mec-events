@@ -35,7 +35,7 @@ We're always interested in your feedback and our [premium forums](https://theeve
 
 == Changelog ==
 
-= [1.0.1] TBD =
+= [1.0.1] 2023-08-18 =
 
 * Compatibility - Setting the required version of The Events Calendar to 5.15.0. [TEC-4442]
 * Fix - Updating export URL with the new settings slug. [TEC-4442]
