@@ -3,7 +3,7 @@
  * Plugin Name:       The Events Calendar Extension: Export Events from Modern Events Calendar
  * Plugin URI:        https://theeventscalendar.com/extensions/migrating-events-from-modern-events-calendar
  * Description:       Export Events from Modern Events Calendar
- * Version:           1.0.1
+ * Version:           1.1.1
  * Extension Class:   Tribe__Extension__Export_Events_Modern_Events_Calendar
  * GitHub Plugin URI: https://github.com/mt-support/tribe-ext-export-mec-events
  * Author:            Modern Tribe, Inc.

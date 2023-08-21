@@ -5,7 +5,7 @@ Tags: events, calendar, export, events, csv, modern
 Requires at least: 6.1.0
 Tested up to: 6.3
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.1
 License: GPL version 3 or any later version
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -35,11 +35,15 @@ We're always interested in your feedback and our [premium forums](https://theeve
 
 == Changelog ==
 
-= [1.0.1] 2023-08-18 =
+= [1.1.1] 2023-08-18 =
 
 * Compatibility - Setting the required version of The Events Calendar to 5.15.0. [TEC-4442]
 * Fix - Updating export URL with the new settings slug. [TEC-4442]
 * Fix - Fixed header output warning happening on CSV export. [TEC-4442]
+
+= [1.1.0] 2018-07-01 =
+
+* Feature – The extension now exports event categories and tags.
 
 = 1.0.0 2018-07-04 = Initial Version
 
